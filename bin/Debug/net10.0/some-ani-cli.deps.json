@@ -1,0 +1,93 @@
+{
+  "runtimeTarget": {
+    "name": ".NETCoreApp,Version=v10.0",
+    "signature": ""
+  },
+  "compilationOptions": {},
+  "targets": {
+    ".NETCoreApp,Version=v10.0": {
+      "some-ani-cli/1.0.0": {
+        "dependencies": {
+          "HtmlAgilityPack": "1.12.4",
+          "Microsoft.AspNetCore.WebUtilities": "10.0.9"
+        },
+        "runtime": {
+          "some-ani-cli.dll": {}
+        }
+      },
+      "HtmlAgilityPack/1.12.4": {
+        "runtime": {
+          "lib/net7.0/HtmlAgilityPack.dll": {
+            "assemblyVersion": "1.12.4.0",
+            "fileVersion": "1.12.4.0"
+          }
+        }
+      },
+      "Microsoft.AspNetCore.WebUtilities/10.0.9": {
+        "dependencies": {
+          "Microsoft.Net.Http.Headers": "10.0.9"
+        },
+        "runtime": {
+          "lib/net10.0/Microsoft.AspNetCore.WebUtilities.dll": {
+            "assemblyVersion": "10.0.0.0",
+            "fileVersion": "10.0.926.27113"
+          }
+        }
+      },
+      "Microsoft.Extensions.Primitives/10.0.9": {
+        "runtime": {
+          "lib/net10.0/Microsoft.Extensions.Primitives.dll": {
+            "assemblyVersion": "10.0.0.0",
+            "fileVersion": "10.0.926.27113"
+          }
+        }
+      },
+      "Microsoft.Net.Http.Headers/10.0.9": {
+        "dependencies": {
+          "Microsoft.Extensions.Primitives": "10.0.9"
+        },
+        "runtime": {
+          "lib/net10.0/Microsoft.Net.Http.Headers.dll": {
+            "assemblyVersion": "10.0.0.0",
+            "fileVersion": "10.0.926.27113"
+          }
+        }
+      }
+    }
+  },
+  "libraries": {
+    "some-ani-cli/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "HtmlAgilityPack/1.12.4": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-ljqvBabvFwKoLniuoQKO8b5bJfJweKLs4fUNS/V5dsvpo0A8MlJqxxn9XVmP2DaskbUXty6IYaWAi1SArGIMeQ==",
+      "path": "htmlagilitypack/1.12.4",
+      "hashPath": "htmlagilitypack.1.12.4.nupkg.sha512"
+    },
+    "Microsoft.AspNetCore.WebUtilities/10.0.9": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-XM4VxXaLmFb77cnGmwRcNGYbYW2MmCQSydwatAvyxGysw+IQxfCt2Q/lm3VCH1dRpBs4nfQTsqbgMC9+OsQiXQ==",
+      "path": "microsoft.aspnetcore.webutilities/10.0.9",
+      "hashPath": "microsoft.aspnetcore.webutilities.10.0.9.nupkg.sha512"
+    },
+    "Microsoft.Extensions.Primitives/10.0.9": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-fmEbAUFsaIKirgLt/lYhuFRBwhcSJN31jjHgCdbQxJiWOum6EdLjkbgGuukSP9z/a+9LibaxII/kF+GwOXgC4g==",
+      "path": "microsoft.extensions.primitives/10.0.9",
+      "hashPath": "microsoft.extensions.primitives.10.0.9.nupkg.sha512"
+    },
+    "Microsoft.Net.Http.Headers/10.0.9": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-MTf4/FeVu1X4Gv5q7iryHLKOTOMThhS19mU8sdbRb+LjIln0upLJ1Bxqsa9uma06GecDnas99IVLqiCC9fVQiQ==",
+      "path": "microsoft.net.http.headers/10.0.9",
+      "hashPath": "microsoft.net.http.headers.10.0.9.nupkg.sha512"
+    }
+  }
+}

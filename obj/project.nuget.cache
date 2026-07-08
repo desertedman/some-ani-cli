@@ -1,0 +1,14 @@
+{
+  "version": 2,
+  "dgSpecHash": "Q3a6oFY55bk=",
+  "success": true,
+  "projectFilePath": "/home/jhoarch/git/some-ani-cli/some-ani-cli.csproj",
+  "expectedPackageFiles": [
+    "/home/jhoarch/.nuget/packages/htmlagilitypack/1.12.4/htmlagilitypack.1.12.4.nupkg.sha512",
+    "/home/jhoarch/.nuget/packages/microsoft.aspnetcore.webutilities/10.0.9/microsoft.aspnetcore.webutilities.10.0.9.nupkg.sha512",
+    "/home/jhoarch/.nuget/packages/microsoft.extensions.primitives/10.0.9/microsoft.extensions.primitives.10.0.9.nupkg.sha512",
+    "/home/jhoarch/.nuget/packages/microsoft.net.http.headers/10.0.9/microsoft.net.http.headers.10.0.9.nupkg.sha512",
+    "/home/jhoarch/.nuget/packages/microsoft.aspnetcore.app.ref/10.0.9/microsoft.aspnetcore.app.ref.10.0.9.nupkg.sha512"
+  ],
+  "logs": []
+}
