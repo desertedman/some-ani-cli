@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
@@ -187,15 +186,14 @@ public class Program
         return fileSource;
     }
 
-    private static async Task PlayEpisode(string path, Track track)
+    private static async Task PlayEpisode(string path, Track track, string episodeName)
     {
         ProcessStartInfo startInfo = new ProcessStartInfo();
         startInfo.FileName = "mpv";
-        // startInfo.Arguments = $"--http-referrer={megaplaySource} \"{path}\"";
         if (track != null)
         {
             startInfo.Arguments =
-                $"--referrer={megaplaySource} \"{path}\" --sub-file=\"{track.File}\"";
+                $"--referrer={megaplaySource} \"{path}\" --sub-file=\"{track.File}\" --title=\"{episodeName} ({track.Label})\"";
         }
         else
         {
@@ -333,7 +331,7 @@ public class Program
             }
 
             // Launch app
-            await PlayEpisode(fileSource.Source!.File, chosenTrack);
+            await PlayEpisode(fileSource.Source!.File, chosenTrack, episodeList[episode]);
         }
     }
 }

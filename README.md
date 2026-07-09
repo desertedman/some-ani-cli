@@ -1,5 +1,7 @@
 # dotnet-ani-cli
 
+Watch anime straight from the terminal!
+
 Built off of <https://github.com/Slimyslushy/anikoto-cli>
 
 Scrapes the MyAnimeList API for search results, and feeds it into the Anikoto/
@@ -10,6 +12,10 @@ Megaplay API. Uses Jikan API for episode information.
 - mpv
 - vlc support planned
 - .NET runtime (only version 10 tested)
+- Linux; Windows support planned
+
+If so inclined to run on Windows or use VLC, you can simply change
+the "PlayEpisode" function and modify the launch options accordingly.
 
 ## Running
 
