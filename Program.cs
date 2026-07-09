@@ -61,6 +61,12 @@ class FileSource
     public List<Track>? trackList { get; set; }
 }
 
+struct Info
+{
+    public string OS { get; set; }
+    public string Player { get; set; }
+}
+
 public class Program
 {
     private const string megaplaySource = "https://megaplay.buzz/";
@@ -68,6 +74,37 @@ public class Program
     private const string jikanAPI = "https://api.jikan.moe/v4/";
     private const string clientKey = "6114d00ca681b7701d1e15fe11a4987e";
     private static HttpClient sharedClient = new();
+    private static Info Info;
+
+    private static void Configure()
+    {
+        if (OperatingSystem.IsLinux())
+        {
+            Info.OS = "Linux";
+
+            if (File.Exists("mpv"))
+            {
+                Info.Player = "mpv";
+            }
+            else if (File.Exists("vlc"))
+            {
+                Info.Player = "vlc";
+            }
+        }
+        else if (OperatingSystem.IsWindows())
+        {
+            Info.OS = "Windows";
+
+            if (File.Exists("mpv"))
+            {
+                Info.Player = "mpv";
+            }
+            else if (File.Exists("vlc"))
+            {
+                Info.Player = "vlc";
+            }
+        }
+    }
 
     private static async Task<String> BuildAndSendRequest(
         string path,
@@ -223,6 +260,7 @@ public class Program
                 Console.Write(i == selectionIndex ? "> " : " ");
                 Console.WriteLine($"{i + 1}) {list[i]?.ToString()}");
             }
+            Console.WriteLine("\n\n\n[Up]/[K] to go up, [Down]/[J] to go down, [Enter] to select");
 
             ConsoleKey key = Console.ReadKey(true).Key;
 
