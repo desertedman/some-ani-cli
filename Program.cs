@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using System.Collections.Generic;
+using System.Diagnostics;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
@@ -11,8 +12,14 @@ class AnimeResult
     public string Url { get; set; } = "";
     public int ID { get; set; }
     public int NumEpisodes { get; set; }
+
+    public override String ToString()
+    {
+        return Name;
+    }
 }
 
+// Recreate JSON structure of megaplay
 class Track
 {
     [JsonPropertyName("file")]
@@ -47,6 +54,7 @@ public class Program
 {
     private const string megaplaySource = "https://megaplay.buzz/";
     private const string malAPI = "https://api.myanimelist.net/v2/";
+    private const string jikanAPI = "https://api.jikan.moe/v4/";
     private const string clientKey = "6114d00ca681b7701d1e15fe11a4987e";
     private static HttpClient sharedClient = new();
 
@@ -118,6 +126,16 @@ public class Program
         anime.NumEpisodes = rootNode["num_episodes"]!.GetValue<int>();
     }
 
+    private static async Task GetEpisodes(AnimeResult anime)
+    {
+        string fullUrl = $"{jikanAPI}anime/{anime.ID}/episodes";
+
+        var jsonString = await BuildAndSendRequest(fullUrl, null);
+        JsonNode rootNode = JsonNode.Parse(jsonString)!;
+
+        Console.WriteLine(rootNode);
+    }
+
     private static async Task<FileSource> GetSources(AnimeResult anime, int episode)
     {
         var fullUrl = $"{megaplaySource}stream/mal/{anime.ID}/{episode}/sub";
@@ -169,6 +187,44 @@ public class Program
         process.WaitForExit();
     }
 
+    private static int MakeSelection<T>(List<T> list)
+    {
+        int selectionIndex = 0;
+
+        while (true)
+        {
+            Console.Clear();
+
+            for (int i = 0; i < list.Count; i++)
+            {
+                // Prepend selection with "> "
+                Console.Write(i == selectionIndex ? "> " : " ");
+                Console.WriteLine($"{i + 1}) {list[i]?.ToString()}");
+            }
+
+            ConsoleKey key = Console.ReadKey(true).Key;
+
+            if (key == ConsoleKey.UpArrow || key == ConsoleKey.K)
+            {
+                if (selectionIndex > 0)
+                {
+                    selectionIndex--;
+                }
+            }
+            else if (key == ConsoleKey.DownArrow || key == ConsoleKey.J)
+            {
+                if (selectionIndex < list.Count - 1)
+                {
+                    selectionIndex++;
+                }
+            }
+            else if (key == ConsoleKey.Enter)
+            {
+                return selectionIndex;
+            }
+        }
+    }
+
     public static async Task Main(string[] args)
     {
         List<AnimeResult> animeList = new();
@@ -176,12 +232,12 @@ public class Program
 
         while (animeList.Count == 0)
         {
-            string? title = "";
+            string title = "";
 
             while (!valid)
             {
                 Console.Write("Please enter a title: ");
-                title = Console.ReadLine()?.Trim();
+                title = Console.ReadLine()!.Trim();
 
                 if (title == "")
                     Console.WriteLine("Invalid title. Please try again.");
@@ -189,7 +245,9 @@ public class Program
                     valid = true;
             }
 
+            Console.Write("Searching...");
             animeList = await MakeSearchQuery(title!);
+            Console.WriteLine("\r\nDone!");
 
             if (animeList.Count == 0)
             {
@@ -198,31 +256,8 @@ public class Program
             }
         }
 
-        for (int i = 0; i < animeList.Count; i++)
-        {
-            var anime = animeList[i];
-            // Offset index to make entries appear starting from 1
-            Console.WriteLine($"{i + 1}) {anime.Name}");
-        }
-
         Console.Write("Select an anime: ");
-        int index = -100;
-        valid = false;
-        while (!valid)
-        {
-            string? input = Console.ReadLine()?.Trim();
-            int.TryParse(input, out index);
-
-            if (index < 1 || index > animeList.Count)
-            {
-                Console.WriteLine("Invalid input. Please try again.");
-            }
-            else
-                valid = true;
-        }
-        // Must offset index to correct for ofsetted display
-        index--;
-
+        int index = MakeSelection(animeList);
         await SetNumEpisodes(animeList[index]);
 
         while (true)
