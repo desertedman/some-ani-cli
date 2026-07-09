@@ -5,8 +5,6 @@ using System.Text.Json.Serialization;
 using HtmlAgilityPack;
 using Microsoft.AspNetCore.WebUtilities;
 
-// curl 'https://api.myanimelist.net/v2/anime?q=dandadan' -H 'X-MAL-Client-ID: 6114d00ca681b7701d1e15fe11a4987e'
-
 class AnimeResult
 {
     public string Name { get; set; } = "";
@@ -157,10 +155,18 @@ public class Program
         ProcessStartInfo startInfo = new ProcessStartInfo();
         startInfo.FileName = "mpv";
         // startInfo.Arguments = $"--http-referrer={megaplaySource} \"{path}\"";
-        startInfo.Arguments =
-            $"--referrer={megaplaySource} \"{path}\" --sub-file=\"{track.File}\"";
+        if (track != null)
+        {
+            startInfo.Arguments =
+                $"--referrer={megaplaySource} \"{path}\" --sub-file=\"{track.File}\"";
+        }
+        else
+        {
+            startInfo.Arguments = $"--referrer={megaplaySource} \"{path}\"";
+        }
 
-        Process.Start(startInfo);
+        Process process = Process.Start(startInfo)!;
+        process.WaitForExit();
     }
 
     public static async Task Main(string[] args)
@@ -219,44 +225,52 @@ public class Program
 
         await SetNumEpisodes(animeList[index]);
 
-        valid = false;
-        int episode = -1;
-        while (!valid)
+        while (true)
         {
-            Console.Write($"Select an episode ({animeList[index].NumEpisodes}): ");
-            string ep = Console.ReadLine()!;
-
-            int.TryParse(ep, out episode);
-
-            if (episode < 1 || episode > animeList[index].NumEpisodes)
+            valid = false;
+            int episode = -1;
+            while (!valid)
             {
-                Console.WriteLine("Invalid episode number. Try again.");
+                Console.Write($"Select an episode ({animeList[index].NumEpisodes}): ");
+                string ep = Console.ReadLine()!;
+
+                int.TryParse(ep, out episode);
+
+                // if (episode < 1 || episode > animeList[index].NumEpisodes)
+                // {
+                //     Console.WriteLine("Invalid episode number. Try again.");
+                // }
+                // else
+                valid = true;
+            }
+
+            var fileSource = await GetSources(animeList[index], episode);
+            // for (int i = 0; i < fileSource.trackList!.Count; i++)
+            // {
+            //     var track = fileSource.trackList[i];
+            //     Console.WriteLine($"{i + 1}) {track.Label}");
+            // }
+
+            // Console.Write("Select a track: ");
+
+            // Select default track
+            Track defaultTrack = null!;
+            if (fileSource.trackList!.Count > 0)
+            {
+                foreach (var track in fileSource.trackList!)
+                {
+                    if (track.Default == true)
+                    {
+                        defaultTrack = track;
+                    }
+                }
+                Console.WriteLine(defaultTrack.Label);
             }
             else
-                valid = true;
+                Console.WriteLine("No tracks found.");
+
+            // Launch app
+            await PlayEpisode(fileSource.Source!.File, defaultTrack);
         }
-
-        var fileSource = await GetSources(animeList[index], episode);
-        // for (int i = 0; i < fileSource.trackList!.Count; i++)
-        // {
-        //     var track = fileSource.trackList[i];
-        //     Console.WriteLine($"{i + 1}) {track.Label}");
-        // }
-
-        // Console.Write("Select a track: ");
-
-        // Select default track
-        Track defaultTrack = null!;
-        foreach (var track in fileSource.trackList!)
-        {
-            if (track.Default == true)
-            {
-                defaultTrack = track;
-            }
-        }
-        Console.WriteLine(defaultTrack.Label);
-
-        // Launch app
-        await PlayEpisode(fileSource.Source!.File, defaultTrack);
     }
 }
