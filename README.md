@@ -2,6 +2,8 @@
 
 Watch anime straight from the terminal!
 
+https://github.com/user-attachments/assets/72321900-eac2-4cb0-ae1e-bf3b6e483af7
+
 Built off of <https://github.com/Slimyslushy/anikoto-cli>
 
 Scrapes the MyAnimeList API for search results, and feeds it into the Anikoto/
