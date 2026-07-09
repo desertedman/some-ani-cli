@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("some-ani-cli")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+1057874056577172b3b93ede2b1edd95baa6a3f0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+8c04a648863ed9b3ea0500e25e12d61645d3a6be")]
 [assembly: System.Reflection.AssemblyProductAttribute("some-ani-cli")]
 [assembly: System.Reflection.AssemblyTitleAttribute("some-ani-cli")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
