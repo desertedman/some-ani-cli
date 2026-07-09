@@ -33,6 +33,18 @@ class Track
 
     [JsonPropertyName("default")]
     public bool Default { get; set; }
+
+    public override String ToString()
+    {
+        string retStr = Label;
+
+        if (Default)
+        {
+            retStr += " (Default)";
+        }
+
+        return retStr;
+    }
 }
 
 class Source
@@ -126,14 +138,21 @@ public class Program
         anime.NumEpisodes = rootNode["num_episodes"]!.GetValue<int>();
     }
 
-    private static async Task GetEpisodes(AnimeResult anime)
+    private static async Task<List<String>> GetEpisodes(AnimeResult anime)
     {
         string fullUrl = $"{jikanAPI}anime/{anime.ID}/episodes";
 
         var jsonString = await BuildAndSendRequest(fullUrl, null);
         JsonNode rootNode = JsonNode.Parse(jsonString)!;
 
-        Console.WriteLine(rootNode);
+        List<String> episodeList = new();
+        var dataArray = rootNode["data"]!.AsArray();
+        foreach (var episode in dataArray)
+        {
+            episodeList.Add(episode!["title"]!.ToString());
+        }
+
+        return episodeList;
     }
 
     private static async Task<FileSource> GetSources(AnimeResult anime, int episode)
@@ -187,9 +206,14 @@ public class Program
         process.WaitForExit();
     }
 
-    private static int MakeSelection<T>(List<T> list)
+    // shouldOffset:
+    // true: should returned value be offset by -1 (ex. if indexing into a 0-indexed array)?
+    // false: should returned value be the raw displayed selection value?
+    private static int MakeSelection<T>(List<T> list, bool shouldOffset, int lastChoice = 0)
     {
-        int selectionIndex = 0;
+        if (lastChoice < 0)
+            lastChoice = 0;
+        int selectionIndex = lastChoice;
 
         while (true)
         {
@@ -220,7 +244,10 @@ public class Program
             }
             else if (key == ConsoleKey.Enter)
             {
-                return selectionIndex;
+                if (shouldOffset)
+                    return selectionIndex;
+                else
+                    return ++selectionIndex;
             }
         }
     }
@@ -257,55 +284,56 @@ public class Program
         }
 
         Console.Write("Select an anime: ");
-        int index = MakeSelection(animeList);
-        await SetNumEpisodes(animeList[index]);
+        int animeIndex = MakeSelection(animeList, true);
+        var episodeList = await GetEpisodes(animeList[animeIndex]);
+        int episode = 0;
 
         while (true)
         {
-            valid = false;
-            int episode = -1;
-            while (!valid)
-            {
-                Console.Write($"Select an episode ({animeList[index].NumEpisodes}): ");
-                string ep = Console.ReadLine()!;
+            episode = MakeSelection(episodeList, false, episode - 1);
+            Console.WriteLine(episode);
+            int trackIndex = -1;
 
-                int.TryParse(ep, out episode);
-
-                // if (episode < 1 || episode > animeList[index].NumEpisodes)
-                // {
-                //     Console.WriteLine("Invalid episode number. Try again.");
-                // }
-                // else
-                valid = true;
-            }
-
-            var fileSource = await GetSources(animeList[index], episode);
-            // for (int i = 0; i < fileSource.trackList!.Count; i++)
-            // {
-            //     var track = fileSource.trackList[i];
-            //     Console.WriteLine($"{i + 1}) {track.Label}");
-            // }
-
-            // Console.Write("Select a track: ");
-
-            // Select default track
-            Track defaultTrack = null!;
+            var fileSource = await GetSources(animeList[animeIndex], episode);
             if (fileSource.trackList!.Count > 0)
             {
-                foreach (var track in fileSource.trackList!)
+                if (args.Contains("--c"))
                 {
-                    if (track.Default == true)
+                    Console.Write("Select a track: ");
+                    trackIndex = MakeSelection(fileSource.trackList!, true);
+                }
+                else
+                {
+                    // Select default track
+                    if (fileSource.trackList!.Count > 0)
                     {
-                        defaultTrack = track;
+                        for (int i = 0; i < fileSource.trackList!.Count; i++)
+                        {
+                            var track = fileSource.trackList[i];
+
+                            if (track.Default == true)
+                            {
+                                trackIndex = i;
+                            }
+                        }
+                        Console.WriteLine();
                     }
                 }
-                Console.WriteLine(defaultTrack.Label);
             }
             else
+            {
                 Console.WriteLine("No subtitle tracks found.");
+            }
+
+            Track chosenTrack = null!;
+            if (trackIndex > -1)
+            {
+                chosenTrack = fileSource.trackList![trackIndex];
+                Console.WriteLine($"Track chosen: {fileSource.trackList[trackIndex]}");
+            }
 
             // Launch app
-            await PlayEpisode(fileSource.Source!.File, defaultTrack);
+            await PlayEpisode(fileSource.Source!.File, chosenTrack);
         }
     }
 }

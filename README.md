@@ -1,14 +1,15 @@
 # dotnet-ani-cli
 
 Built off of <https://github.com/Slimyslushy/anikoto-cli>
+
 Scrapes the MyAnimeList API for search results, and feeds it into the Anikoto/
-Megaplay API.
+Megaplay API. Uses Jikan API for episode information.
 
 ## Requirements
 
 - mpv
 - vlc support planned
-- Dotnet runtime (only version 10 tested)
+- .NET runtime (only version 10 tested)
 
 ## Running
 
@@ -17,6 +18,11 @@ git clone https://github.com/desertedman/dotnet-ani-cli.git
 cd dotnet-ani-cli
 dotnet run
 ```
+
+## Launch Options
+
+- `--c` - Choose subtitle track. If not specified, uses the default subtitle
+track (usually English)
 
 ## Disclaimer
 
