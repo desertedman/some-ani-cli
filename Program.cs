@@ -1,5 +1,7 @@
 ﻿using System.Diagnostics;
+using System.Text.Json;
 using System.Text.Json.Nodes;
+using System.Text.Json.Serialization;
 using HtmlAgilityPack;
 using Microsoft.AspNetCore.WebUtilities;
 
@@ -11,6 +13,36 @@ class AnimeResult
     public string Url { get; set; } = "";
     public int ID { get; set; }
     public int NumEpisodes { get; set; }
+}
+
+class Track
+{
+    [JsonPropertyName("file")]
+    public string File { get; set; } = "";
+
+    [JsonPropertyName("label")]
+    public string Label { get; set; } = "";
+
+    [JsonPropertyName("kind")]
+    public string Kind { get; set; } = "";
+
+    [JsonPropertyName("default")]
+    public bool Default { get; set; }
+}
+
+class Source
+{
+    [JsonPropertyName("file")]
+    public string File { get; set; } = "";
+}
+
+class FileSource
+{
+    [JsonPropertyName("sources")]
+    public Source? Source { get; set; }
+
+    [JsonPropertyName("tracks")]
+    public List<Track>? trackList { get; set; }
 }
 
 public class Program
@@ -88,7 +120,7 @@ public class Program
         anime.NumEpisodes = rootNode["num_episodes"]!.GetValue<int>();
     }
 
-    private static async Task<String> GetSources(AnimeResult anime, int episode)
+    private static async Task<FileSource> GetSources(AnimeResult anime, int episode)
     {
         var fullUrl = $"{megaplaySource}stream/mal/{anime.ID}/{episode}/sub";
 
@@ -110,16 +142,23 @@ public class Program
         JsonNode rootNode = JsonNode.Parse(jsonString)!;
         // Console.WriteLine(rootNode);
 
-        string fileSource = rootNode["sources"]!["file"]!.ToString();
+        // Deserialize json
+        FileSource fileSource = rootNode.Deserialize<FileSource>()!;
+        // foreach (var track in fileSource.subTracks!)
+        // {
+        //     Console.WriteLine(track.Label);
+        // }
+
         return fileSource;
     }
 
-    private static async Task PlayEpisode(string path)
+    private static async Task PlayEpisode(string path, Track track)
     {
         ProcessStartInfo startInfo = new ProcessStartInfo();
         startInfo.FileName = "mpv";
         // startInfo.Arguments = $"--http-referrer={megaplaySource} \"{path}\"";
-        startInfo.Arguments = $"--referrer={megaplaySource} \"{path}\"";
+        startInfo.Arguments =
+            $"--referrer={megaplaySource} \"{path}\" --sub-file=\"{track.File}\"";
 
         Process.Start(startInfo);
     }
@@ -156,10 +195,11 @@ public class Program
         for (int i = 0; i < animeList.Count; i++)
         {
             var anime = animeList[i];
+            // Offset index to make entries appear starting from 1
             Console.WriteLine($"{i + 1}) {anime.Name}");
         }
 
-        Console.WriteLine("Select an anime: ");
+        Console.Write("Select an anime: ");
         int index = -100;
         valid = false;
         while (!valid)
@@ -174,6 +214,7 @@ public class Program
             else
                 valid = true;
         }
+        // Must offset index to correct for ofsetted display
         index--;
 
         await SetNumEpisodes(animeList[index]);
@@ -182,7 +223,7 @@ public class Program
         int episode = -1;
         while (!valid)
         {
-            Console.WriteLine($"Please select an episode ({animeList[index].NumEpisodes}): ");
+            Console.Write($"Select an episode ({animeList[index].NumEpisodes}): ");
             string ep = Console.ReadLine()!;
 
             int.TryParse(ep, out episode);
@@ -195,10 +236,27 @@ public class Program
                 valid = true;
         }
 
-        string source = await GetSources(animeList[index], episode);
-        Console.WriteLine(source);
+        var fileSource = await GetSources(animeList[index], episode);
+        // for (int i = 0; i < fileSource.trackList!.Count; i++)
+        // {
+        //     var track = fileSource.trackList[i];
+        //     Console.WriteLine($"{i + 1}) {track.Label}");
+        // }
+
+        // Console.Write("Select a track: ");
+
+        // Select default track
+        Track defaultTrack = null!;
+        foreach (var track in fileSource.trackList!)
+        {
+            if (track.Default == true)
+            {
+                defaultTrack = track;
+            }
+        }
+        Console.WriteLine(defaultTrack.Label);
 
         // Launch app
-        await PlayEpisode(source);
+        await PlayEpisode(fileSource.Source!.File, defaultTrack);
     }
 }
