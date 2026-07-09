@@ -1,4 +1,4 @@
-# some-ani-cli
+# dotnet-ani-cli
 
 Built off of https://github.com/Slimyslushy/anikoto-cli
 
