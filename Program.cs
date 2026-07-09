@@ -76,12 +76,32 @@ public class Program
     private const string clientKey = "6114d00ca681b7701d1e15fe11a4987e";
     private static HttpClient sharedClient = new();
     private static Info Info;
+    private static List<String> Players = new List<String> { "mpv", "vlc" };
 
     private static void Configure()
     {
         if (OperatingSystem.IsLinux())
         {
             Info.OS = "Linux";
+            bool programFound = false;
+            foreach (var player in Players)
+            {
+                using var process = new Process();
+                process.StartInfo = new ProcessStartInfo
+                {
+                    FileName = "which",
+                    Arguments = "mpv",
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true,
+                    UseShellExecute = false,
+                    CreateNoWindow = true,
+                };
+
+                process.Start();
+                process.WaitForExit();
+            }
+
+            // Test for program
 
             if (File.Exists("mpv"))
             {
@@ -90,6 +110,10 @@ public class Program
             else if (File.Exists("vlc"))
             {
                 Info.Player = "vlc";
+            }
+            else
+            {
+                Console.WriteLine("No player found!");
             }
         }
         else if (OperatingSystem.IsWindows())
@@ -253,19 +277,39 @@ public class Program
         return fileSource;
     }
 
+    private static String BuildLaunchArgs(string path, Track track, string episodeName)
+    {
+        string launchArgs = "";
+        if (Info.Player == "mpv")
+        {
+            launchArgs = $"--referrer={megaplaySource} \"{path}\"";
+
+            if (track != null)
+            {
+                launchArgs +=
+                    $"--sub-file=\"{track.File}\" --title=\"{episodeName} ({track.Label})\"";
+            }
+        }
+        else if (Info.Player == "vlc")
+        {
+            launchArgs = $"--http-referrer={megaplaySource} \"{path}\" ";
+            if (track != null)
+            {
+                launchArgs +=
+                    $"--sub-file=\"{track.File}\" --meta-title=\"{episodeName} ({track.Label})\"";
+            }
+        }
+
+        return launchArgs;
+    }
+
     private static async Task PlayEpisode(string path, Track track, string episodeName)
     {
         ProcessStartInfo startInfo = new ProcessStartInfo();
-        startInfo.FileName = "mpv";
-        if (track != null)
-        {
-            startInfo.Arguments =
-                $"--referrer={megaplaySource} \"{path}\" --sub-file=\"{track.File}\" --title=\"{episodeName} ({track.Label})\"";
-        }
-        else
-        {
-            startInfo.Arguments = $"--referrer={megaplaySource} \"{path}\"";
-        }
+        startInfo.FileName = Info.Player;
+
+        string launchArgs = BuildLaunchArgs(path, track, episodeName);
+        startInfo.Arguments = launchArgs;
 
         Process process = Process.Start(startInfo)!;
         process.WaitForExit();
@@ -320,6 +364,8 @@ public class Program
 
     public static async Task Main(string[] args)
     {
+        Configure();
+
         List<AnimeResult> animeList = new();
         bool valid = false;
 
