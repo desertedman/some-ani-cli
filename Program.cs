@@ -283,7 +283,7 @@ public class Program
         return fileSource;
     }
 
-    private static String BuildLaunchArgs(string path, Track track, string episodeName)
+    private static String BuildLaunchArgs(string path, Track track, string episodeName, AnimeResult anime)
     {
         string launchArgs = "";
         if (Info.Player == "mpv")
@@ -293,7 +293,7 @@ public class Program
             if (track != null)
             {
                 launchArgs +=
-                    $" --sub-file=\"{track.File}\" --title=\"{episodeName} ({track.Label})\"";
+                    $" --sub-file=\"{track.File}\" --title=\"{anime.Name} - {episodeName} ({track.Label})\"";
             }
         }
         else if (Info.Player == "vlc")
@@ -302,19 +302,19 @@ public class Program
             if (track != null)
             {
                 launchArgs +=
-                    $" --sub-file=\"{track.File}\" --meta-title=\"{episodeName} ({track.Label})\"";
+                    $" --sub-file=\"{track.File}\" --meta-title=\"{anime.Name} - {episodeName} ({track.Label})\"";
             }
         }
 
         return launchArgs;
     }
 
-    private static async Task PlayEpisode(string path, Track track, string episodeName)
+    private static async Task PlayEpisode(string path, Track track, string episodeName, AnimeResult anime)
     {
         ProcessStartInfo startInfo = new ProcessStartInfo();
         startInfo.FileName = Info.Path;
 
-        string launchArgs = BuildLaunchArgs(path, track, episodeName);
+        string launchArgs = BuildLaunchArgs(path, track, episodeName, anime);
         startInfo.Arguments = launchArgs;
 
         Console.WriteLine($"EXECUTING: {startInfo.FileName} {startInfo.Arguments}");
@@ -456,7 +456,7 @@ public class Program
             }
 
             // Launch app
-            await PlayEpisode(fileSource.Source!.File, chosenTrack, episodeList[episode]);
+            await PlayEpisode(fileSource.Source!.File, chosenTrack, episodeList[episode], animeList[animeIndex]);
         }
     }
 }
