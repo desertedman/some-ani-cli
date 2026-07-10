@@ -64,7 +64,6 @@ class FileSource
 
 struct Info
 {
-    public string OS { get; set; }
     public string Player { get; set; }
     public string Path { get; set; }
 }
@@ -81,10 +80,11 @@ public class Program
 
     private static void Configure()
     {
+        bool programFound = false;
+        Console.WriteLine("Detecting player...");
+
         if (OperatingSystem.IsLinux())
         {
-            Info.OS = "Linux";
-            bool programFound = false;
             foreach (var player in Players)
             {
                 // Test for program
@@ -104,32 +104,37 @@ public class Program
 
                 if (process.ExitCode == 0)
                 {
-                    Console.WriteLine($"{player} detected. Using {player}.");
                     Info.Player = player;
+                    Info.Path = player;
                     programFound = true;
                     break;
                 }
             }
-
-            if (!programFound)
+        }
+        else if (OperatingSystem.IsWindows())
+        {
+            if (File.Exists(@"C:\Program Files\MPV Player\mpv.exe"))
             {
-                Console.WriteLine("No supported player detected. Exiting.");
-                Environment.Exit(1);
+                Info.Player = "mpv";
+                Info.Path = @"C:\Program Files\MPV Player\mpv.exe";
+                programFound = true;
+            }
+            else if (File.Exists(@"C:\Program Files\VideoLAN\VLC\vlc.exe"))
+            {
+                Info.Player = "vlc";
+                Info.Path = @"C:\Program Files\VideoLAN\VLC\vlc.exe";
+                programFound = true;
             }
         }
-        // else if (OperatingSystem.IsWindows())
-        // {
-        //     Info.OS = "Windows";
-        //
-        //     if (File.Exists("mpv"))
-        //     {
-        //         Info.Player = "mpv";
-        //     }
-        //     else if (File.Exists("vlc"))
-        //     {
-        //         Info.Player = "vlc";
-        //     }
-        // }
+        if (!programFound)
+        {
+            Console.WriteLine("No supported player detected. Exiting.");
+            Environment.Exit(1);
+        }
+        else
+        {
+            Console.WriteLine($"{Info.Player} detected. Using {Info.Player}.");
+        }
     }
 
     private static async Task<String> BuildAndSendRequest(
@@ -307,7 +312,7 @@ public class Program
     private static async Task PlayEpisode(string path, Track track, string episodeName)
     {
         ProcessStartInfo startInfo = new ProcessStartInfo();
-        startInfo.FileName = Info.Player;
+        startInfo.FileName = Info.Path;
 
         string launchArgs = BuildLaunchArgs(path, track, episodeName);
         startInfo.Arguments = launchArgs;
