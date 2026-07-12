@@ -283,7 +283,12 @@ public class Program
         return fileSource;
     }
 
-    private static String BuildLaunchArgs(string path, Track track, string episodeName, AnimeResult anime)
+    private static String BuildLaunchArgs(
+        string path,
+        Track track,
+        string episodeName,
+        AnimeResult anime
+    )
     {
         string launchArgs = "";
         if (Info.Player == "mpv")
@@ -309,7 +314,12 @@ public class Program
         return launchArgs;
     }
 
-    private static async Task PlayEpisode(string path, Track track, string episodeName, AnimeResult anime)
+    private static async Task PlayEpisode(
+        string path,
+        Track track,
+        string episodeName,
+        AnimeResult anime
+    )
     {
         ProcessStartInfo startInfo = new ProcessStartInfo();
         startInfo.FileName = Info.Path;
@@ -413,8 +423,9 @@ public class Program
 
         while (true)
         {
+            // Returns actual episode number; BEWARE OF OUT OF BOUNDS INDEX INTO episodeList
             episode = MakeSelection(episodeList, false, episode - 1);
-            Console.WriteLine(episode);
+            Console.WriteLine($"Playing episode {episode}");
             int trackIndex = -1;
 
             var fileSource = await GetSources(animeList[animeIndex], episode);
@@ -455,8 +466,21 @@ public class Program
                 Console.WriteLine($"Track chosen: {fileSource.trackList[trackIndex]}");
             }
 
+            for (int i = 0; i < episodeList.Count; i++)
+            {
+                Console.WriteLine($"{i}) {episodeList[i]}");
+            }
+
+            int actualEpisodeIndex = episode - 1;
+            Console.WriteLine($"Accessing episode {episode}: {episodeList[actualEpisodeIndex]}");
+
             // Launch app
-            await PlayEpisode(fileSource.Source!.File, chosenTrack, episodeList[episode], animeList[animeIndex]);
+            await PlayEpisode(
+                fileSource.Source!.File,
+                chosenTrack,
+                episodeList[actualEpisodeIndex],
+                animeList[animeIndex]
+            );
         }
     }
 }
